@@ -2,11 +2,34 @@
 
 body {
   margin: 0;
-  background: #f5f5f7;
+  background: #f5f7fb;
   color: #111827;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #qr-label,
+  #qr-label * {
+    visibility: visible;
+  }
+
+  #qr-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: 2px dashed #111827;
+  }
 }

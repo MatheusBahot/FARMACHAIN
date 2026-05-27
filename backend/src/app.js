@@ -9,14 +9,40 @@ const traceRoutes = require("./routes/trace.routes");
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://farmachain.netlify.app"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(null, true);
+    }
+  })
+);
+
 app.use(express.json({ limit: "10mb" }));
 
 app.get("/", (req, res) => {
   res.json({
     name: "FarmaChain API",
-    description: "Rastreabilidade farmacêutica com ledger blockchain-like",
-    status: "online"
+    description:
+      "Rastreabilidade farmacêutica com QR Code, GPS, criptografia e ledger blockchain-like",
+    status: "online",
+    modules: [
+      "medicamentos",
+      "lotes",
+      "estoque",
+      "dispensação",
+      "farmacovigilância",
+      "QR Code",
+      "auditoria blockchain"
+    ]
   });
 });
 
