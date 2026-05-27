@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: farmachain-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: farmachain_user
+      POSTGRES_PASSWORD: farmachain_password
+      POSTGRES_DB: farmachain_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: farmachain-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@farmachain.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgres
