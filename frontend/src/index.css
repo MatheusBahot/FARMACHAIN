@@ -7,10 +7,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   background: #f5f5f7;
-  color: #111827;
+  color: #1d1d1f;
   font-family:
     Inter,
     ui-sans-serif,
@@ -25,12 +29,23 @@ body {
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
+img {
+  display: block;
+  user-select: none;
 }
 
-img {
-  user-select: none;
+.apple-section {
+  padding: 96px 24px;
+}
+
+.apple-title {
+  letter-spacing: -0.055em;
+}
+
+.apple-card {
+  background: #ffffff;
+  border-radius: 36px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.06);
 }
 
 @media print {

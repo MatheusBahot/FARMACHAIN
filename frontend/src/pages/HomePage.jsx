@@ -1,437 +1,107 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import Shell from "../components/Shell";
 import {
+  Activity,
   ArrowRight,
-  CheckCircle2,
+  Blocks,
+  LayoutDashboard,
+  PackagePlus,
   QrCode,
   ShieldCheck,
-  MapPin,
-  Pill,
-  Sparkles,
-  Database,
-  RadioTower
+  UserRoundCheck
 } from "lucide-react";
-import { modules, flowSteps, imagePanels } from "../data/farmachainContent";
-import Shell from "../components/Shell";
 
-function GlassCard({ children, className = "" }) {
+function ModuleCard({ icon: Icon, title, text, to }) {
   return (
-    <div
-      className={`rounded-[2rem] border border-white/60 bg-white/80 p-6 shadow-sm backdrop-blur ${className}`}
+    <Link
+      to={to}
+      className="rounded-[36px] bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
     >
-      {children}
-    </div>
-  );
-}
-
-function IllustrationPanel({ item, index }) {
-  const Icon = item.icon;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.08 }}
-      className="relative overflow-hidden rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm"
-    >
-      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-100 blur-2xl" />
-      <div className="absolute -bottom-12 -left-12 h-36 w-36 rounded-full bg-emerald-100 blur-2xl" />
-
-      <div className="relative">
-        <div className="mb-10 flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-950 text-white">
-          <Icon size={30} />
-        </div>
-
-        <h3 className="text-2xl font-semibold text-gray-950">{item.title}</h3>
-        <p className="mt-3 leading-7 text-gray-600">{item.subtitle}</p>
-
-        <div className="mt-8 grid grid-cols-5 gap-2">
-          {Array.from({ length: 15 }).map((_, i) => (
-            <div
-              key={i}
-              className={`h-3 rounded-full ${
-                i % 3 === 0
-                  ? "bg-blue-500"
-                  : i % 4 === 0
-                  ? "bg-emerald-500"
-                  : "bg-gray-200"
-              }`}
-            />
-          ))}
-        </div>
+      <Icon size={28} />
+      <h2 className="mt-8 text-3xl font-semibold tracking-[-0.04em]">
+        {title}
+      </h2>
+      <p className="mt-4 text-[15px] leading-7 text-neutral-600">
+        {text}
+      </p>
+      <div className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-blue-600">
+        Abrir
+        <ArrowRight size={16} />
       </div>
-    </motion.div>
-  );
-}
-
-function ImageCard({ src, alt, title, description }) {
-  return (
-    <div className="overflow-hidden rounded-[2.5rem] bg-white shadow-sm">
-      <img
-        src={src}
-        alt={alt}
-        className="h-72 w-full object-cover"
-        onError={(event) => {
-          event.currentTarget.style.display = "none";
-        }}
-      />
-      <div className="p-6">
-        <h3 className="text-2xl font-semibold">{title}</h3>
-        <p className="mt-3 leading-7 text-gray-600">{description}</p>
-      </div>
-    </div>
+    </Link>
   );
 }
 
 export default function HomePage() {
   return (
     <Shell>
-      <section className="relative overflow-hidden">
-        <div className="absolute left-1/2 top-0 h-[520px] w-[780px] -translate-x-1/2 rounded-full bg-blue-200/50 blur-3xl" />
-        <div className="absolute right-0 top-32 h-[360px] w-[360px] rounded-full bg-emerald-200/60 blur-3xl" />
+      <section className="px-6 py-20 text-center">
+        <h1 className="mx-auto max-w-5xl text-6xl font-semibold tracking-[-0.06em] md:text-8xl">
+          Plataforma FarmaChain.
+        </h1>
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-6 py-20 lg:grid-cols-2 lg:py-28">
-          <motion.div
-            initial={{ opacity: 0, y: 26 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55 }}
-          >
-            <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
-              <Sparkles size={16} />
-              Rastreabilidade farmacêutica inteligente
-            </div>
-
-            <h1 className="mt-7 text-5xl font-semibold tracking-tight text-gray-950 md:text-7xl">
-              Do lote ao paciente, com blockchain, QR Code e segurança.
-            </h1>
-
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-gray-600">
-              O FarmaChain é uma plataforma para logística farmacêutica municipal,
-              controle de estoque, validade, fabricante, distribuidor, dispensação
-              protegida e farmacovigilância, com foco em Salvador.
-            </p>
-
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link
-                to="/demo"
-                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-4 font-medium text-white transition hover:bg-blue-700"
-              >
-                Ver demonstração em tempo real
-                <ArrowRight size={18} />
-              </Link>
-
-              <Link
-                to="/admin"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-4 font-medium text-gray-900 shadow-sm transition hover:bg-gray-50"
-              >
-                Cadastrar lote
-              </Link>
-            </div>
-
-            <div className="mt-10 grid gap-3 text-sm text-gray-600 sm:grid-cols-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={18} className="text-emerald-600" />
-                CPF protegido
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={18} className="text-emerald-600" />
-                QR imprimível
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={18} className="text-emerald-600" />
-                Auditoria por hash
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.55, delay: 0.1 }}
-            className="relative"
-          >
-            <GlassCard className="relative overflow-hidden">
-              <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-blue-300/40 blur-2xl" />
-              <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-emerald-300/40 blur-2xl" />
-
-              <div className="relative">
-                <div className="mb-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">Lote rastreado</p>
-                    <h2 className="text-2xl font-semibold">LOS-SSA-2026-A01</h2>
-                  </div>
-
-                  <div className="rounded-2xl bg-gray-950 p-3 text-white">
-                    <QrCode />
-                  </div>
-                </div>
-
-                <div className="rounded-[1.5rem] bg-gray-950 p-5 text-white">
-                  <p className="text-sm text-gray-400">Medicamento</p>
-                  <h3 className="mt-1 text-3xl font-semibold">Losartana 50 mg</h3>
-
-                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl bg-white/10 p-4">
-                      <p className="text-xs text-gray-400">Fabricante</p>
-                      <p className="mt-1 text-sm">Farma Brasil S.A.</p>
-                    </div>
-
-                    <div className="rounded-2xl bg-white/10 p-4">
-                      <p className="text-xs text-gray-400">Distribuidor</p>
-                      <p className="mt-1 text-sm">Nordeste Medicamentos</p>
-                    </div>
-
-                    <div className="rounded-2xl bg-white/10 p-4">
-                      <p className="text-xs text-gray-400">Unidade</p>
-                      <p className="mt-1 text-sm">UBS Federação</p>
-                    </div>
-
-                    <div className="rounded-2xl bg-white/10 p-4">
-                      <p className="text-xs text-gray-400">Status</p>
-                      <p className="mt-1 text-sm text-emerald-300">
-                        Ativo e rastreável
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-5 grid gap-3">
-                  <div className="flex items-center gap-3 rounded-2xl bg-gray-50 p-4">
-                    <ShieldCheck className="text-emerald-600" />
-                    <div>
-                      <p className="font-medium">Bloco blockchain validado</p>
-                      <p className="text-sm text-gray-500">
-                        Hash anterior + hash atual íntegros
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 rounded-2xl bg-gray-50 p-4">
-                    <MapPin className="text-blue-600" />
-                    <div>
-                      <p className="font-medium">Retirada com GPS</p>
-                      <p className="text-sm text-gray-500">
-                        Salvador, distrito Barra/Rio Vermelho
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </GlassCard>
-          </motion.div>
-        </div>
+        <p className="mx-auto mt-7 max-w-3xl text-xl leading-9 text-neutral-600">
+          Área operacional para acessar os módulos de blockchain, estoque,
+          cadastro de lotes, QR Code, dispensação, farmacovigilância e auditoria.
+        </p>
       </section>
 
-      <section id="modulos" className="mx-auto max-w-7xl px-6 py-16">
-        <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-            Plataforma ampla
-          </p>
-
-          <h2 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">
-            Um ecossistema completo para gestão farmacêutica municipal.
-          </h2>
-
-          <p className="mt-5 text-lg leading-8 text-gray-600">
-            O projeto integra estoque, lote, validade, dispensação, auditoria,
-            geolocalização, QR Code e farmacovigilância em uma experiência única.
-          </p>
-        </div>
-
-        <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {modules.map((module, index) => {
-            const Icon = module.icon;
-
-            return (
-              <motion.div
-                key={module.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className="rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-              >
-                <div className="mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-950 text-white">
-                  <Icon size={25} />
-                </div>
-
-                <h3 className="text-xl font-semibold">{module.title}</h3>
-                <p className="mt-3 leading-7 text-gray-600">
-                  {module.description}
-                </p>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <div className="grid gap-5 lg:grid-cols-3">
-          {imagePanels.map((item, index) => (
-            <IllustrationPanel key={item.title} item={item} index={index} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <ImageCard
-            src="/images/logistica-farmaceutica.jpg"
-            alt="Logística farmacêutica"
-            title="Logística rastreável"
-            description="Do distribuidor à unidade de saúde, cada etapa do lote pode ser registrada e auditada."
+      <section className="px-6 pb-24">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <ModuleCard
+            icon={LayoutDashboard}
+            title="Painel executivo"
+            text="Indicadores gerais de medicamentos, lotes, estoque, validade, distritos e blocos blockchain."
+            to="/executivo"
           />
 
-          <ImageCard
-            src="/images/controle-estoque.jpg"
-            alt="Controle de estoque farmacêutico"
-            title="Estoque inteligente"
-            description="Alertas de vencimento, ruptura, lote bloqueado e redistribuição entre unidades."
+          <ModuleCard
+            icon={PackagePlus}
+            title="Cadastro e QR"
+            text="Cadastre medicamento e lote. O QR Code é gerado automaticamente para impressão."
+            to="/admin"
           />
 
-          <ImageCard
-            src="/images/qr-code-medicamento.jpg"
-            alt="QR Code em medicamento"
-            title="QR Code por lote"
-            description="A etiqueta impressa permite consultar validade, fabricante, distribuidor, unidade e histórico blockchain."
-          />
-        </div>
-      </section>
-
-      <section id="fluxo" className="mx-auto max-w-7xl px-6 py-16">
-        <div className="rounded-[2.5rem] bg-gray-950 p-8 text-white md:p-12">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">
-              Como funciona
-            </p>
-
-            <h2 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">
-              A jornada do medicamento fica visível do cadastro à dispensação.
-            </h2>
-          </div>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-5">
-            {flowSteps.map((step) => (
-              <div key={step.number} className="rounded-[1.7rem] bg-white/8 p-5">
-                <p className="text-4xl font-semibold text-blue-300">
-                  {step.number}
-                </p>
-
-                <h3 className="mt-5 text-xl font-semibold">{step.title}</h3>
-
-                <p className="mt-3 text-sm leading-7 text-gray-300">
-                  {step.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="qr" className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid items-center gap-8 lg:grid-cols-2">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-              Etiqueta inteligente
-            </p>
-
-            <h2 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">
-              QR Code gerado no cadastro do lote, pronto para impressão.
-            </h2>
-
-            <p className="mt-5 text-lg leading-8 text-gray-600">
-              Ao cadastrar um lote, o FarmaChain cria uma rota pública de
-              rastreabilidade e um QR Code. Esse QR pode ser impresso, colado no
-              medicamento ou na caixa logística e lido posteriormente por celular.
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/admin"
-                className="inline-flex items-center gap-2 rounded-full bg-gray-950 px-6 py-4 font-medium text-white"
-              >
-                Gerar QR no cadastro
-                <ArrowRight size={18} />
-              </Link>
-            </div>
-          </div>
-
-          <div className="rounded-[2.5rem] bg-white p-8 shadow-sm">
-            <div className="mx-auto max-w-sm rounded-[2rem] border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center">
-              <div className="mx-auto flex h-56 w-56 items-center justify-center rounded-3xl bg-white shadow-inner">
-                <QrCode size={150} />
-              </div>
-
-              <h3 className="mt-6 text-2xl font-semibold">Etiqueta do lote</h3>
-
-              <p className="mt-2 text-sm text-gray-500">
-                LOS-SSA-2026-A01 • Losartana 50 mg • Validade 01/2028
-              </p>
-
-              <p className="mt-4 rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700">
-                Pronto para impressão
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-[2.5rem] bg-white p-8 shadow-sm">
-            <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-black text-white">
-              <Database size={30} />
-            </div>
-
-            <h2 className="text-4xl font-semibold tracking-tight">
-              Dados protegidos, rastreabilidade ampliada.
-            </h2>
-
-            <p className="mt-5 text-lg leading-8 text-gray-600">
-              A blockchain registra os eventos críticos. Os dados sensíveis do
-              paciente são tratados por hash e criptografia, evitando exposição
-              direta de CPF e informações pessoais.
-            </p>
-          </div>
-
-          <div className="rounded-[2.5rem] bg-white p-8 shadow-sm">
-            <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-600 text-white">
-              <RadioTower size={30} />
-            </div>
-
-            <h2 className="text-4xl font-semibold tracking-tight">
-              Farmacovigilância e recall.
-            </h2>
-
-            <p className="mt-5 text-lg leading-8 text-gray-600">
-              Eventos adversos podem ser vinculados ao lote, permitindo bloqueio,
-              investigação sanitária e consulta pública do status atualizado via
-              QR Code.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 pb-20">
-        <div className="rounded-[2.5rem] bg-blue-600 p-10 text-white md:p-14">
-          <h2 className="max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-            Uma solução chamativa para demonstrar tecnologia aplicada à saúde pública.
-          </h2>
-
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-blue-50">
-            O FarmaChain pode evoluir para login por perfil, painel de estoque,
-            mapa de Salvador, alertas de vencimento, recall sanitário, relatórios
-            em PDF e blockchain permissionada real.
-          </p>
-
-          <Link
+          <ModuleCard
+            icon={UserRoundCheck}
+            title="Dispensação"
+            text="Simule a retirada do medicamento pelo paciente com CPF criptografado e GPS da unidade."
             to="/demo"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-4 font-medium text-blue-700"
-          >
-            Abrir painel demonstrativo
-            <ArrowRight size={18} />
-          </Link>
+          />
+
+          <ModuleCard
+            icon={Activity}
+            title="Farmacovigilância"
+            text="Registre eventos adversos, analise riscos e bloqueie lotes para recall sanitário."
+            to="/farmacovigilancia"
+          />
+
+          <ModuleCard
+            icon={Blocks}
+            title="Blockchain"
+            text="Consulte eventos registrados em blocos encadeados por hash e valide a integridade da cadeia."
+            to="/executivo"
+          />
+
+          <ModuleCard
+            icon={QrCode}
+            title="Rastreabilidade"
+            text="Leia o QR Code do lote e visualize a história logística completa do medicamento."
+            to="/admin"
+          />
+        </div>
+      </section>
+
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-6xl rounded-[48px] bg-black p-10 text-center text-white md:p-16">
+          <ShieldCheck className="mx-auto" size={36} />
+          <h2 className="mt-8 text-5xl font-semibold tracking-[-0.05em]">
+            Blockchain acessível após login.
+          </h2>
+          <p className="mx-auto mt-6 max-w-2xl text-[16px] leading-8 text-neutral-300">
+            Os módulos internos concentram os registros críticos da operação:
+            cadastro, lote, estoque, dispensação, QR Code, recall e auditoria.
+          </p>
         </div>
       </section>
     </Shell>

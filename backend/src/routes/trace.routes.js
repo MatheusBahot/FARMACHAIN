@@ -18,6 +18,7 @@ router.get("/batch/:batchId", async (req, res) => {
         m.concentration,
         m.pharmaceutical_form,
         m.therapeutic_class,
+        m.storage_temperature,
         m.rename_item,
         m.remume_item,
         h.name AS current_unit_name,
@@ -43,10 +44,15 @@ router.get("/batch/:batchId", async (req, res) => {
 
     const movementsResult = await pool.query(
       `
-      SELECT *
-      FROM stock_movements
-      WHERE batch_id = $1
-      ORDER BY created_at ASC
+      SELECT
+        sm.*,
+        from_unit.name AS from_unit_name,
+        to_unit.name AS to_unit_name
+      FROM stock_movements sm
+      LEFT JOIN health_units from_unit ON from_unit.id = sm.from_unit_id
+      LEFT JOIN health_units to_unit ON to_unit.id = sm.to_unit_id
+      WHERE sm.batch_id = $1
+      ORDER BY sm.created_at ASC
       `,
       [batchId]
     );
@@ -75,6 +81,16 @@ router.get("/batch/:batchId", async (req, res) => {
       [batchId]
     );
 
+    const pharmacovigilanceResult = await pool.query(
+      `
+      SELECT *
+      FROM pharmacovigilance_reports
+      WHERE batch_id = $1
+      ORDER BY created_at ASC
+      `,
+      [batchId]
+    );
+
     const ledger = await getLedgerByEntity(batchId);
     const validation = await validateLedger();
     const qr = await generateTraceQrCode(batchId);
@@ -83,6 +99,7 @@ router.get("/batch/:batchId", async (req, res) => {
       batch,
       movements: movementsResult.rows,
       dispensations: dispensationsResult.rows,
+      pharmacovigilance: pharmacovigilanceResult.rows,
       blockchain: {
         valid: validation.valid,
         validation,
@@ -99,8 +116,15 @@ router.get("/batch/:batchId", async (req, res) => {
 });
 
 router.get("/validate-ledger", async (req, res) => {
-  const validation = await validateLedger();
-  res.json(validation);
+  try {
+    const validation = await validateLedger();
+    res.json(validation);
+  } catch (error) {
+    res.status(500).json({
+      error: "Erro ao validar ledger.",
+      details: error.message
+    });
+  }
 });
 
 module.exports = router;

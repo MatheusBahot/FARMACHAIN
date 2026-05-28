@@ -13,28 +13,18 @@ import {
 import { api } from "../services/api";
 import Shell from "../components/Shell";
 
-function Card({ children, className = "" }) {
+function Stat({ icon: Icon, label, value }) {
   return (
-    <div className={`rounded-[2rem] border border-black/5 bg-white p-6 shadow-sm ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-function Stat({ icon: Icon, label, value, helper }) {
-  return (
-    <Card>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm text-gray-500">{label}</p>
-          <h3 className="mt-2 text-4xl font-semibold tracking-tight">{value}</h3>
-          {helper && <p className="mt-2 text-xs text-gray-400">{helper}</p>}
-        </div>
-        <div className="rounded-2xl bg-gray-100 p-3">
-          <Icon size={24} />
-        </div>
+    <div className="rounded-[34px] bg-white p-7 shadow-sm">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-neutral-500">{label}</p>
+        <Icon size={22} className="text-neutral-500" />
       </div>
-    </Card>
+
+      <h3 className="mt-8 text-5xl font-semibold tracking-tight">
+        {value ?? "-"}
+      </h3>
+    </div>
   );
 }
 
@@ -54,95 +44,93 @@ export default function ExecutivePage() {
 
   return (
     <Shell>
-      <section className="mx-auto max-w-7xl px-6 py-14">
-        <div className="max-w-4xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-blue-600">
-            Painel executivo
-          </p>
-          <h1 className="mt-5 text-5xl font-semibold tracking-tight md:text-7xl">
-            Visão ampla da assistência farmacêutica.
+      <section className="px-6 py-20 text-center">
+        <div className="mx-auto max-w-5xl">
+          <h1 className="apple-title text-6xl font-semibold leading-[0.95] md:text-8xl">
+            Painel executivo.
           </h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-gray-600">
-            Indicadores de estoque, lotes, farmacovigilância, dispensações,
-            validade e integridade do ledger blockchain.
+
+          <p className="mx-auto mt-7 max-w-3xl text-xl leading-9 text-neutral-600">
+            Uma visão simples da assistência farmacêutica: estoque, lotes,
+            dispensações, alertas, farmacovigilância e integridade blockchain.
           </p>
         </div>
+      </section>
 
-        {cards && (
-          <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Stat icon={Pill} label="Medicamentos" value={cards.medicines} />
-            <Stat icon={Package} label="Lotes totais" value={cards.batches} />
-            <Stat icon={ShieldCheck} label="Lotes ativos" value={cards.activeBatches} />
-            <Stat icon={AlertTriangle} label="Lotes bloqueados" value={cards.blockedBatches} />
-            <Stat icon={ClipboardList} label="Vencendo em 90 dias" value={cards.expiringBatches} />
-            <Stat icon={UserRoundCheck} label="Dispensações" value={cards.dispensations} />
-            <Stat icon={Activity} label="Farmacovigilância" value={cards.pharmacovigilanceReports} />
-            <Stat icon={Blocks} label="Blocos blockchain" value={cards.blockchainBlocks} />
-          </div>
-        )}
+      <section className="px-6 pb-20">
+        <div className="mx-auto grid max-w-6xl gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <Stat icon={Pill} label="Medicamentos" value={cards?.medicines} />
+          <Stat icon={Package} label="Lotes" value={cards?.batches} />
+          <Stat icon={ShieldCheck} label="Ativos" value={cards?.activeBatches} />
+          <Stat icon={AlertTriangle} label="Bloqueados" value={cards?.blockedBatches} />
+          <Stat icon={ClipboardList} label="Vencendo" value={cards?.expiringBatches} />
+          <Stat icon={UserRoundCheck} label="Dispensações" value={cards?.dispensations} />
+          <Stat icon={Activity} label="Eventos" value={cards?.pharmacovigilanceReports} />
+          <Stat icon={Blocks} label="Blocos" value={cards?.blockchainBlocks} />
+        </div>
+      </section>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <Card>
+      <section className="px-6 pb-24">
+        <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-2">
+          <div className="rounded-[42px] bg-white p-8 shadow-sm">
             <div className="flex items-center gap-3">
               <MapPin />
-              <h2 className="text-2xl font-semibold">Distritos sanitários</h2>
+              <h2 className="text-3xl font-semibold tracking-tight">
+                Distritos sanitários
+              </h2>
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-8 space-y-3">
               {data?.districts?.map((district) => (
                 <div
                   key={district.district}
-                  className="rounded-2xl bg-gray-50 p-4"
+                  className="rounded-[24px] bg-[#f5f5f7] p-5"
                 >
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <h3 className="font-semibold">{district.district}</h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="mt-1 text-sm text-neutral-500">
                         {district.units} unidade(s) • {district.batches} lote(s)
                       </p>
                     </div>
-                    <p className="text-sm font-medium text-blue-600">
+
+                    <p className="text-sm font-semibold text-blue-600">
                       {district.stock} un.
                     </p>
                   </div>
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
 
-          <Card>
+          <div className="rounded-[42px] bg-black p-8 text-white shadow-sm">
             <div className="flex items-center gap-3">
               <ShieldCheck />
-              <h2 className="text-2xl font-semibold">Integridade blockchain</h2>
+              <h2 className="text-3xl font-semibold tracking-tight">
+                Blockchain
+              </h2>
             </div>
 
-            <div className="mt-6 rounded-[1.7rem] bg-black p-6 text-white">
-              <p className="text-sm text-gray-400">Status da cadeia</p>
-              <h3 className="mt-2 text-3xl font-semibold">
-                {data?.blockchain?.valid ? "Validada" : "Inconsistente"}
-              </h3>
-              <p className="mt-4 text-sm leading-7 text-gray-300">
-                A cadeia é verificada comparando o hash de cada bloco com o hash
-                anterior. Qualquer alteração indevida quebra a sequência.
+            <h3 className="apple-title mt-12 text-6xl font-semibold">
+              {data?.blockchain?.valid ? "Validada." : "Atenção."}
+            </h3>
+
+            <p className="mt-6 text-lg leading-8 text-neutral-300">
+              O ledger verifica a sequência dos blocos por meio de hashes
+              encadeados. Se algum registro for alterado, a cadeia deixa de ser
+              válida.
+            </p>
+
+            <div className="mt-10 rounded-[28px] bg-white/10 p-6">
+              <p className="text-sm text-neutral-400">
+                Total de blocos verificados
+              </p>
+
+              <p className="mt-3 text-5xl font-semibold">
+                {data?.blockchain?.totalBlocks ?? 0}
               </p>
             </div>
-
-            <div className="mt-6">
-              <h3 className="font-semibold">Medicamentos mais dispensados</h3>
-              <div className="mt-4 space-y-3">
-                {data?.topMedicines?.map((item) => (
-                  <div key={item.name} className="rounded-2xl bg-gray-50 p-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {item.total_dispensed} dispensado(s)
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
+          </div>
         </div>
       </section>
     </Shell>
