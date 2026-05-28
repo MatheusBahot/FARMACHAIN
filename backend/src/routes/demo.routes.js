@@ -52,13 +52,16 @@ router.get("/summary", async (req, res) => {
       ledgerBlocks: Number(ledger.rows[0].count)
     });
   } catch (error) {
-    console.error("Erro em /api/demo/summary:", error);
+  console.error("ERRO COMPLETO EM /api/demo/reset:", error);
 
-    res.status(500).json({
-      error: "Erro ao gerar resumo.",
-      details: error.message
-    });
-  }
-});
-
-module.exports = router;
+  res.status(500).json({
+    error: "Erro ao recriar demonstração.",
+    details: error.message || String(error),
+    code: error.code || null,
+    table: error.table || null,
+    constraint: error.constraint || null,
+    hint: error.hint || null,
+    suggestion:
+      "Verifique DATABASE_URL, inicialização do banco, existência das tabelas e logs do Render."
+  });
+}

@@ -10,6 +10,7 @@ const unitRoutes = require("./routes/unit.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const pharmacovigilanceRoutes = require("./routes/pharmacovigilance.routes");
 const recallRoutes = require("./routes/recall.routes");
+const healthRoutes = require("./routes/health.routes");
 
 const app = express();
 
@@ -39,5 +40,6 @@ app.use("/api/units", unitRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/pharmacovigilance", pharmacovigilanceRoutes);
 app.use("/api/recall", recallRoutes);
+app.use("/api/health", healthRoutes);
 
 module.exports = app;

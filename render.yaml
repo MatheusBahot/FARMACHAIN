@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: farmachain-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CPF_SECRET_SALT
+        generateValue: true
+      - key: CPF_AES_SECRET
+        value: 12345678901234567890123456789012
+      - key: APP_PUBLIC_URL
+        value: https://farmachain.netlify.app
