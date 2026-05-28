@@ -2,7 +2,8 @@ const QRCode = require("qrcode");
 require("dotenv").config();
 
 async function generateTraceQrCode(batchId) {
-  const traceUrl = `${process.env.APP_PUBLIC_URL}/trace/${batchId}`;
+  const publicUrl = process.env.APP_PUBLIC_URL || "http://localhost:5173";
+  const traceUrl = `${publicUrl}/trace/${batchId}`;
 
   const qrCodeDataUrl = await QRCode.toDataURL(traceUrl, {
     errorCorrectionLevel: "H",

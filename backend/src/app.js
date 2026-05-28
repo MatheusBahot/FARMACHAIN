@@ -6,23 +6,16 @@ const medicineRoutes = require("./routes/medicine.routes");
 const batchRoutes = require("./routes/batch.routes");
 const dispenseRoutes = require("./routes/dispense.routes");
 const traceRoutes = require("./routes/trace.routes");
+const unitRoutes = require("./routes/unit.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
+const pharmacovigilanceRoutes = require("./routes/pharmacovigilance.routes");
+const recallRoutes = require("./routes/recall.routes");
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://farmachain.netlify.app"
-];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(null, true);
-    }
+    origin: true
   })
 );
 
@@ -32,17 +25,8 @@ app.get("/", (req, res) => {
   res.json({
     name: "FarmaChain API",
     description:
-      "Rastreabilidade farmacêutica com QR Code, GPS, criptografia e ledger blockchain-like",
-    status: "online",
-    modules: [
-      "medicamentos",
-      "lotes",
-      "estoque",
-      "dispensação",
-      "farmacovigilância",
-      "QR Code",
-      "auditoria blockchain"
-    ]
+      "Rastreabilidade farmacêutica com QR Code, GPS, criptografia, farmacovigilância, recall e ledger blockchain-like",
+    status: "online"
   });
 });
 
@@ -51,5 +35,9 @@ app.use("/api/medicines", medicineRoutes);
 app.use("/api/batches", batchRoutes);
 app.use("/api/dispense", dispenseRoutes);
 app.use("/api/trace", traceRoutes);
+app.use("/api/units", unitRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/pharmacovigilance", pharmacovigilanceRoutes);
+app.use("/api/recall", recallRoutes);
 
 module.exports = app;
