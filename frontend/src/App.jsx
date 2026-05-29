@@ -6,6 +6,7 @@ import TracePage from "./pages/TracePage";
 import AdminPage from "./pages/AdminPage";
 import ExecutivePage from "./pages/ExecutivePage";
 import PharmacovigilancePage from "./pages/PharmacovigilancePage";
+import InventoryPage from "./pages/InventoryPage";
 
 function PrivateRoute({ children }) {
   const logged = localStorage.getItem("farmachain-auth") === "true";
@@ -21,6 +22,7 @@ export default function App() {
 
         <Route path="/inicio" element={<PrivateRoute><HomePage /></PrivateRoute>} />
         <Route path="/executivo" element={<PrivateRoute><ExecutivePage /></PrivateRoute>} />
+        <Route path="/inventario" element={<PrivateRoute><InventoryPage /></PrivateRoute>} />
         <Route path="/admin" element={<PrivateRoute><AdminPage /></PrivateRoute>} />
         <Route path="/farmacovigilancia" element={<PrivateRoute><PharmacovigilancePage /></PrivateRoute>} />
         <Route path="/demo" element={<PrivateRoute><DemoPage /></PrivateRoute>} />

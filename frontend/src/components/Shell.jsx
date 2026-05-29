@@ -16,7 +16,7 @@ export default function Shell({ children }) {
   return (
     <main className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f]">
       <header className="sticky top-0 z-50 border-b border-black/5 bg-white/80 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-2.5">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-2.5">
           <Link to="/inicio" className="flex items-center gap-2">
             <img
               src="/images/logo/farmachain-logo.png"
@@ -28,12 +28,13 @@ export default function Shell({ children }) {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-7 md:flex">
+          <nav className="hidden items-center gap-6 md:flex">
             <NavLink to="/inicio" className={navClass}>Início</NavLink>
             <NavLink to="/executivo" className={navClass}>Painel</NavLink>
+            <NavLink to="/inventario" className={navClass}>Inventário</NavLink>
             <NavLink to="/admin" className={navClass}>Cadastro</NavLink>
             <NavLink to="/farmacovigilancia" className={navClass}>Vigilância</NavLink>
-            <NavLink to="/demo" className={navClass}>Demo</NavLink>
+            <NavLink to="/demo" className={navClass}>Dispensação</NavLink>
           </nav>
 
           <button

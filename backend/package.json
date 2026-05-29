@@ -7,14 +7,18 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "init-db": "node src/scripts/init-db.js"
+    "init-db": "node src/scripts/init-db.js",
+    "seed:salvador": "node src/scripts/seed-salvador.js"
   },
   "keywords": [
     "farmachain",
     "blockchain",
     "farmacia",
     "logistica",
-    "farmacovigilancia"
+    "farmacovigilancia",
+    "salvador",
+    "sus",
+    "qr-code"
   ],
   "author": "Matheus Augusto",
   "license": "MIT",

@@ -10,24 +10,30 @@ const unitRoutes = require("./routes/unit.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const pharmacovigilanceRoutes = require("./routes/pharmacovigilance.routes");
 const recallRoutes = require("./routes/recall.routes");
-const healthRoutes = require("./routes/health.routes");
+const inventoryRoutes = require("./routes/inventory.routes");
 
 const app = express();
 
-app.use(
-  cors({
-    origin: true
-  })
-);
-
+app.use(cors({ origin: true }));
 app.use(express.json({ limit: "10mb" }));
 
 app.get("/", (req, res) => {
   res.json({
     name: "FarmaChain API",
-    description:
-      "Rastreabilidade farmacêutica com QR Code, GPS, criptografia, farmacovigilância, recall e ledger blockchain-like",
-    status: "online"
+    status: "online",
+    modules: [
+      "distritos sanitários",
+      "unidades de saúde",
+      "CAF",
+      "inventário",
+      "medicamentos",
+      "lotes",
+      "QR Code",
+      "dispensação robusta",
+      "paciente criptografado",
+      "blockchain-like",
+      "farmacovigilância"
+    ]
   });
 });
 
@@ -40,6 +46,6 @@ app.use("/api/units", unitRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/pharmacovigilance", pharmacovigilanceRoutes);
 app.use("/api/recall", recallRoutes);
-app.use("/api/health", healthRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 module.exports = app;

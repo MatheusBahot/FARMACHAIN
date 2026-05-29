@@ -3,6 +3,8 @@ const pool = require("../db/pool");
 const {
   hashCpf,
   encryptCpf,
+  hashSusCard,
+  encryptSusCard,
   createDocumentHash
 } = require("../services/crypto.service");
 const { createLedgerEvent } = require("../services/ledger.service");
@@ -17,7 +19,10 @@ router.post("/", async (req, res) => {
 
     const {
       batchId,
+      patientName,
       cpf,
+      susCard,
+      theoreticalConsumption,
       prescriptionText,
       quantity,
       pharmacistName,
@@ -29,6 +34,7 @@ router.post("/", async (req, res) => {
       SELECT
         b.*,
         m.name AS medicine_name,
+        m.storage_temperature,
         h.id AS health_unit_id,
         h.name AS health_unit_name,
         h.district,
@@ -67,10 +73,7 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const today = new Date();
-    const expiration = new Date(batch.expiration_date);
-
-    if (expiration < today) {
+    if (new Date(batch.expiration_date) < new Date()) {
       await client.query("ROLLBACK");
       return res.status(400).json({
         error: "Medicamento vencido. Dispensação bloqueada."
@@ -79,7 +82,37 @@ router.post("/", async (req, res) => {
 
     const patientHash = hashCpf(cpf);
     const encryptedCpf = encryptCpf(cpf);
-    const prescriptionHash = createDocumentHash(prescriptionText || "SEM_RECEITA_INFORMADA");
+    const susHash = susCard ? hashSusCard(susCard) : null;
+    const encryptedSus = susCard ? encryptSusCard(susCard) : null;
+    const prescriptionHash = createDocumentHash(
+      prescriptionText || "SEM_RECEITA_INFORMADA"
+    );
+
+    const patientResult = await client.query(
+      `
+      INSERT INTO patients
+      (
+        full_name,
+        cpf_hash,
+        cpf_encrypted,
+        sus_card_hash,
+        sus_card_encrypted,
+        theoretical_consumption
+      )
+      VALUES ($1,$2,$3,$4,$5,$6)
+      RETURNING *
+      `,
+      [
+        patientName || "Paciente de Demonstração",
+        patientHash,
+        encryptedCpf,
+        susHash,
+        encryptedSus,
+        JSON.stringify(theoreticalConsumption || [])
+      ]
+    );
+
+    const patient = patientResult.rows[0];
 
     const dispensationResult = await client.query(
       `
@@ -87,8 +120,12 @@ router.post("/", async (req, res) => {
       (
         batch_id,
         health_unit_id,
+        patient_id,
         patient_hash,
         patient_encrypted_cpf,
+        patient_name_preview,
+        patient_sus_hash,
+        patient_sus_encrypted,
         prescription_hash,
         quantity,
         pharmacist_name,
@@ -97,14 +134,18 @@ router.post("/", async (req, res) => {
         longitude
       )
       VALUES
-      ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
       RETURNING *
       `,
       [
         batchId,
         batch.health_unit_id,
+        patient.id,
         patientHash,
         encryptedCpf,
+        patient.full_name,
+        susHash,
+        encryptedSus,
         prescriptionHash,
         Number(quantity),
         pharmacistName,
@@ -149,7 +190,7 @@ router.post("/", async (req, res) => {
         batch.latitude,
         batch.longitude,
         pharmacistName,
-        "Baixa por dispensação ao paciente com CPF pseudonimizado."
+        "Baixa por dispensação ao paciente com CPF e Cartão SUS protegidos."
       ]
     );
 
@@ -164,9 +205,16 @@ router.post("/", async (req, res) => {
         batchId,
         batchNumber: batch.batch_number,
         medicineName: batch.medicine_name,
+        storageTemperature: batch.storage_temperature,
         quantity: Number(quantity),
-        patientHash,
-        encryptedCpfPreview: encryptedCpf,
+        patient: {
+          namePreview: patient.full_name,
+          patientHash,
+          encryptedCpf,
+          susHash,
+          encryptedSus,
+          theoreticalConsumption: theoreticalConsumption || []
+        },
         prescriptionHash,
         healthUnit: {
           id: batch.health_unit_id,
@@ -188,10 +236,14 @@ router.post("/", async (req, res) => {
     res.status(201).json({
       message: "Medicamento dispensado com sucesso.",
       dispensation,
-      privacy: {
+      patient: {
+        id: patient.id,
+        namePreview: patient.full_name,
         patientHash,
         encryptedCpf,
-        warning: "CPF real não foi gravado em texto puro na blockchain."
+        susHash,
+        encryptedSus,
+        theoreticalConsumption: theoreticalConsumption || []
       },
       blockchainBlock: block
     });

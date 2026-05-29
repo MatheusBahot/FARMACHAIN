@@ -1,108 +1,76 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { api } from "../services/api";
 import {
-  ArrowLeft,
-  AlertTriangle,
-  Database,
+  LockKeyhole,
   MapPin,
   Package,
-  Pill,
-  Printer,
   QrCode,
-  RefreshCw,
   ShieldCheck,
   UserRoundCheck
 } from "lucide-react";
 import Shell from "../components/Shell";
+import { api } from "../services/api";
 
-function Card({ children, className = "" }) {
+function Field({ label, children }) {
   return (
-    <div className={`rounded-[34px] bg-white p-7 shadow-sm ${className}`}>
-      {children}
-    </div>
+    <label className="block">
+      <span className="text-[13px] font-medium text-neutral-700">{label}</span>
+      <div className="mt-2">{children}</div>
+    </label>
   );
 }
 
-function StatCard({ icon: Icon, label, value }) {
-  return (
-    <Card>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-neutral-500">{label}</p>
-          <h3 className="mt-4 text-5xl font-semibold tracking-tight text-[#1d1d1f]">
-            {value ?? "-"}
-          </h3>
-        </div>
-
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f5f5f7] text-[#1d1d1f]">
-          <Icon size={24} />
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function DataBox({ label, value }) {
-  return (
-    <div className="rounded-[24px] bg-[#f5f5f7] p-5">
-      <p className="text-sm text-neutral-500">{label}</p>
-      <p className="mt-3 break-all font-mono text-xs leading-6 text-neutral-800">
-        {value}
-      </p>
-    </div>
-  );
+function inputClass() {
+  return "w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-[14px] outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100";
 }
 
 export default function DemoPage() {
-  const [summary, setSummary] = useState(null);
   const [batches, setBatches] = useState([]);
-  const [selectedBatch, setSelectedBatch] = useState(null);
+  const [selectedBatchId, setSelectedBatchId] = useState("");
   const [trace, setTrace] = useState(null);
   const [dispensation, setDispensation] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  async function loadSummary() {
-    const response = await api.get("/demo/summary");
-    setSummary(response.data);
-  }
+  const [form, setForm] = useState({
+    patientName: "Maria de Souza Santos",
+    cpf: "123.456.789-00",
+    susCard: "898 0012 3456 7890",
+    prescriptionText:
+      "Receita médica: Losartana Potássica 50 mg, uso contínuo, 1 comprimido ao dia por 30 dias.",
+    quantity: 1,
+    pharmacistName: "Farmacêutico Responsável",
+    pharmacistCrf: "CRF-BA 00000",
+    theoreticalConsumption: [
+      {
+        medicine: "Losartana Potássica 50 mg",
+        dosage: "1 comprimido ao dia",
+        estimatedMonthlyConsumption: 30,
+        treatment: "Uso contínuo"
+      }
+    ]
+  });
 
   async function loadBatches() {
     const response = await api.get("/batches");
     setBatches(response.data);
 
-    if (response.data.length > 0) {
-      setSelectedBatch(response.data[0]);
+    if (response.data.length > 0 && !selectedBatchId) {
+      setSelectedBatchId(response.data[0].id);
       await loadTrace(response.data[0].id);
     }
   }
 
-  async function resetDemo() {
-    setLoading(true);
-
-    try {
-      await api.post("/demo/reset");
-      setDispensation(null);
-      await loadSummary();
-      await loadBatches();
-    } catch (error) {
-      alert(
-        error.response?.data?.error ||
-          "Erro ao recriar a demonstração FarmaChain."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
   async function loadTrace(batchId) {
+    if (!batchId) return;
+
     const response = await api.get(`/trace/batch/${batchId}`);
     setTrace(response.data);
   }
 
-  async function dispenseMedicine() {
-    if (!selectedBatch) {
-      alert("Nenhum lote selecionado para dispensação.");
+  async function dispenseMedicine(event) {
+    event.preventDefault();
+
+    if (!selectedBatchId) {
+      alert("Cadastre ou selecione um lote primeiro.");
       return;
     }
 
@@ -110,20 +78,16 @@ export default function DemoPage() {
 
     try {
       const response = await api.post("/dispense", {
-        batchId: selectedBatch.id,
-        cpf: "123.456.789-00",
-        prescriptionText:
-          "Receita médica: Losartana 50 mg, uso contínuo, 1 comprimido ao dia.",
-        quantity: 1,
-        pharmacistName: "Farmacêutico Responsável",
-        pharmacistCrf: "CRF-BA 00000"
+        batchId: selectedBatchId,
+        ...form,
+        quantity: Number(form.quantity)
       });
 
       setDispensation(response.data);
-
-      await loadSummary();
       await loadBatches();
-      await loadTrace(selectedBatch.id);
+      await loadTrace(selectedBatchId);
+
+      alert("Dispensação registrada e vinculada ao paciente.");
     } catch (error) {
       alert(error.response?.data?.error || "Erro ao dispensar medicamento.");
     } finally {
@@ -131,372 +95,290 @@ export default function DemoPage() {
     }
   }
 
-  function printQrLabel() {
-    window.print();
-  }
-
   useEffect(() => {
-    resetDemo();
+    loadBatches();
   }, []);
 
   return (
     <Shell>
-      <section className="px-6 py-16 md:py-20">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-sm font-medium text-neutral-500 transition hover:text-black"
-            >
-              <ArrowLeft size={18} />
-              Voltar para o início
-            </Link>
+      <section className="mx-auto max-w-7xl px-6 py-16">
+        <div className="text-center">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.24em] text-blue-600">
+            Dispensação robusta
+          </p>
 
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={resetDemo}
-                disabled={loading}
-                className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <RefreshCw size={18} />
-                Recriar demonstração
-              </button>
+          <h1 className="mx-auto mt-5 max-w-5xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl">
+            Produto.
+            <br />
+            Paciente.
+            <br />
+            Blockchain.
+          </h1>
 
-              <button
-                onClick={dispenseMedicine}
-                disabled={loading || !selectedBatch}
-                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <UserRoundCheck size={18} />
-                Dispensar medicamento
-              </button>
-            </div>
-          </div>
+          <p className="mx-auto mt-6 max-w-3xl text-[16px] leading-8 text-neutral-600">
+            Vincule o medicamento ao consumidor final usando nome, CPF, Cartão
+            SUS, consumo teórico, farmacêutico responsável, GPS e registro no
+            ledger.
+          </p>
+        </div>
 
-          <div className="mb-16 text-center">
-            <div className="mx-auto mb-7 flex h-16 w-16 items-center justify-center rounded-3xl bg-black text-white">
-              <ShieldCheck size={30} />
-            </div>
-
-            <h1 className="apple-title mx-auto max-w-5xl text-6xl font-semibold leading-[0.95] text-[#1d1d1f] md:text-8xl">
-              Dispensação em tempo real.
-            </h1>
-
-            <p className="mx-auto mt-7 max-w-3xl text-xl leading-9 text-neutral-600">
-              Simule a entrega de um medicamento ao paciente, veja o CPF
-              criptografado, o hash pseudonimizado, o GPS da unidade, o QR Code
-              do lote e o bloco registrado no ledger.
-            </p>
-          </div>
-
-          {summary && (
-            <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
-              <StatCard icon={Database} label="Unidades" value={summary.units} />
-              <StatCard
-                icon={Pill}
-                label="Medicamentos"
-                value={summary.medicines}
-              />
-              <StatCard icon={Package} label="Lotes" value={summary.batches} />
-              <StatCard
-                icon={UserRoundCheck}
-                label="Dispensações"
-                value={summary.dispensations}
-              />
-              <StatCard
-                icon={ShieldCheck}
-                label="Blocos"
-                value={summary.ledgerBlocks}
-              />
-            </section>
-          )}
-
-          <section className="mt-8 grid gap-6 lg:grid-cols-3">
-            <Card>
-              <h2 className="text-3xl font-semibold tracking-tight text-[#1d1d1f]">
-                Lote demonstrativo.
+        <div className="mt-12 grid gap-6 lg:grid-cols-2">
+          <form
+            onSubmit={dispenseMedicine}
+            className="rounded-[38px] bg-white p-8 shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <UserRoundCheck size={25} />
+              <h2 className="text-3xl font-semibold tracking-[-0.04em]">
+                Dados da dispensação
               </h2>
+            </div>
 
-              {selectedBatch ? (
-                <div className="mt-7 space-y-4 text-sm leading-6 text-neutral-700">
-                  <p>
-                    <strong>Medicamento:</strong>{" "}
-                    {selectedBatch.medicine_name}
-                  </p>
+            <div className="mt-7 grid gap-4">
+              <Field label="Lote do medicamento">
+                <select
+                  className={inputClass()}
+                  value={selectedBatchId}
+                  onChange={async (e) => {
+                    setSelectedBatchId(e.target.value);
+                    await loadTrace(e.target.value);
+                    setDispensation(null);
+                  }}
+                  required
+                >
+                  <option value="">Selecione um lote</option>
+                  {batches.map((batch) => (
+                    <option key={batch.id} value={batch.id}>
+                      {batch.medicine_name} — {batch.batch_number}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-                  <p>
-                    <strong>Lote:</strong> {selectedBatch.batch_number}
-                  </p>
+              <Field label="Nome do paciente">
+                <input
+                  className={inputClass()}
+                  value={form.patientName}
+                  onChange={(e) =>
+                    setForm({ ...form, patientName: e.target.value })
+                  }
+                  required
+                />
+              </Field>
 
-                  <p>
-                    <strong>Fabricante:</strong> {selectedBatch.manufacturer}
-                  </p>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="CPF">
+                  <input
+                    className={inputClass()}
+                    value={form.cpf}
+                    onChange={(e) => setForm({ ...form, cpf: e.target.value })}
+                    required
+                  />
+                </Field>
 
-                  <p>
-                    <strong>Distribuidor:</strong> {selectedBatch.distributor}
-                  </p>
-
-                  <p>
-                    <strong>Estoque atual:</strong>{" "}
-                    {selectedBatch.quantity_current}
-                  </p>
-
-                  <p>
-                    <strong>Unidade:</strong> {selectedBatch.current_unit_name}
-                  </p>
-
-                  <p>
-                    <strong>Distrito:</strong> {selectedBatch.district}
-                  </p>
-
-                  <p>
-                    <strong>Status:</strong>{" "}
-                    <span
-                      className={
-                        selectedBatch.status === "ACTIVE"
-                          ? "font-semibold text-emerald-600"
-                          : "font-semibold text-red-600"
-                      }
-                    >
-                      {selectedBatch.status}
-                    </span>
-                  </p>
-                </div>
-              ) : (
-                <p className="mt-5 text-neutral-500">Nenhum lote carregado.</p>
-              )}
-            </Card>
-
-            <Card className="lg:col-span-2">
-              <div className="flex items-center gap-3">
-                <MapPin />
-                <h2 className="text-3xl font-semibold tracking-tight text-[#1d1d1f]">
-                  Local de retirada.
-                </h2>
+                <Field label="Cartão SUS">
+                  <input
+                    className={inputClass()}
+                    value={form.susCard}
+                    onChange={(e) =>
+                      setForm({ ...form, susCard: e.target.value })
+                    }
+                  />
+                </Field>
               </div>
 
-              {trace?.batch ? (
-                <div className="mt-7 grid gap-5 md:grid-cols-2">
-                  <div className="rounded-[28px] bg-[#f5f5f7] p-6">
-                    <p className="text-sm text-neutral-500">Unidade</p>
+              <Field label="Receita / prescrição">
+                <textarea
+                  className={`${inputClass()} min-h-28`}
+                  value={form.prescriptionText}
+                  onChange={(e) =>
+                    setForm({ ...form, prescriptionText: e.target.value })
+                  }
+                />
+              </Field>
 
-                    <h3 className="mt-2 text-xl font-semibold">
-                      {trace.batch.current_unit_name}
-                    </h3>
-
-                    <p className="mt-3 leading-7 text-neutral-600">
-                      {trace.batch.address}
-                    </p>
-
-                    <p className="mt-3 text-sm text-neutral-500">
-                      Distrito: {trace.batch.district}
-                    </p>
-                  </div>
-
-                  <div className="rounded-[28px] bg-[#f5f5f7] p-6">
-                    <p className="text-sm text-neutral-500">
-                      Coordenadas GPS
-                    </p>
-
-                    <h3 className="mt-2 break-all text-xl font-semibold">
-                      {trace.batch.latitude}, {trace.batch.longitude}
-                    </h3>
-
-                    <a
-                      className="mt-5 inline-flex rounded-full bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
-                      href={`https://www.google.com/maps?q=${trace.batch.latitude},${trace.batch.longitude}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Abrir no mapa
-                    </a>
-                  </div>
-                </div>
-              ) : (
-                <p className="mt-5 text-neutral-500">
-                  Rastreamento ainda não carregado.
-                </p>
-              )}
-            </Card>
-          </section>
-
-          {dispensation && (
-            <section className="mt-8">
-              <Card>
-                <div className="flex items-center gap-3">
-                  <ShieldCheck />
-                  <h2 className="text-3xl font-semibold tracking-tight text-[#1d1d1f]">
-                    Dados protegidos.
-                  </h2>
-                </div>
-
-                <p className="mt-4 max-w-3xl leading-8 text-neutral-600">
-                  O CPF real não é exposto diretamente na blockchain. A
-                  dispensação usa hash pseudonimizado, CPF criptografado e hash
-                  da receita para preservar a rastreabilidade sem abrir dados
-                  sensíveis.
-                </p>
-
-                <div className="mt-7 grid gap-5 md:grid-cols-2">
-                  <DataBox
-                    label="Hash pseudonimizado do paciente"
-                    value={dispensation.privacy.patientHash}
+              <div className="grid gap-4 md:grid-cols-3">
+                <Field label="Quantidade">
+                  <input
+                    type="number"
+                    className={inputClass()}
+                    value={form.quantity}
+                    onChange={(e) =>
+                      setForm({ ...form, quantity: e.target.value })
+                    }
+                    required
                   />
+                </Field>
 
-                  <DataBox
-                    label="CPF criptografado"
-                    value={dispensation.privacy.encryptedCpf}
+                <Field label="Farmacêutico">
+                  <input
+                    className={inputClass()}
+                    value={form.pharmacistName}
+                    onChange={(e) =>
+                      setForm({ ...form, pharmacistName: e.target.value })
+                    }
+                    required
                   />
+                </Field>
 
-                  <DataBox
-                    label="Hash da receita"
-                    value={dispensation.blockchainBlock.payload.prescriptionHash}
+                <Field label="CRF">
+                  <input
+                    className={inputClass()}
+                    value={form.pharmacistCrf}
+                    onChange={(e) =>
+                      setForm({ ...form, pharmacistCrf: e.target.value })
+                    }
+                    required
                   />
-
-                  <DataBox
-                    label="Hash do bloco"
-                    value={dispensation.blockchainBlock.block_hash}
-                  />
-                </div>
-              </Card>
-            </section>
-          )}
-
-          <section className="mt-8 grid gap-6 lg:grid-cols-3">
-            <Card>
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <QrCode />
-                  <h2 className="text-2xl font-semibold tracking-tight">
-                    Etiqueta QR.
-                  </h2>
-                </div>
-
-                <button
-                  onClick={printQrLabel}
-                  className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800"
-                >
-                  <Printer size={16} />
-                  Imprimir
-                </button>
+                </Field>
               </div>
 
-              {trace?.qr?.qrCodeDataUrl ? (
-                <div
-                  id="qr-label"
-                  className="mt-7 rounded-[30px] border-2 border-dashed border-neutral-300 bg-white p-5 text-center"
-                >
-                  <img
-                    src={trace.qr.qrCodeDataUrl}
-                    alt="QR Code do lote"
-                    className="mx-auto h-64 w-64"
-                  />
+              <button
+                disabled={loading}
+                className="rounded-full bg-blue-600 px-6 py-3 text-[13px] font-medium text-white disabled:opacity-50"
+              >
+                Dispensar e vincular ao paciente
+              </button>
+            </div>
+          </form>
 
-                  <h3 className="mt-5 text-xl font-semibold">
+          <div className="rounded-[38px] bg-white p-8 shadow-sm">
+            <div className="flex items-center gap-3">
+              <Package size={25} />
+              <h2 className="text-3xl font-semibold tracking-[-0.04em]">
+                Medicamento selecionado
+              </h2>
+            </div>
+
+            {trace?.batch ? (
+              <div className="mt-7 space-y-4 text-[14px]">
+                <div className="rounded-[24px] bg-[#f5f5f7] p-5">
+                  <p className="text-xs text-neutral-500">Medicamento</p>
+                  <h3 className="mt-1 text-xl font-semibold">
                     {trace.batch.medicine_name}
                   </h3>
+                </div>
 
-                  <p className="mt-2 text-sm text-neutral-500">
-                    Lote: {trace.batch.batch_number}
-                  </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-[24px] bg-[#f5f5f7] p-5">
+                    <p className="text-xs text-neutral-500">Lote</p>
+                    <h3 className="mt-1 font-semibold">{trace.batch.batch_number}</h3>
+                  </div>
 
-                  <p className="text-sm text-neutral-500">
-                    Validade:{" "}
-                    {new Date(trace.batch.expiration_date).toLocaleDateString(
-                      "pt-BR"
-                    )}
-                  </p>
+                  <div className="rounded-[24px] bg-[#f5f5f7] p-5">
+                    <p className="text-xs text-neutral-500">Estoque</p>
+                    <h3 className="mt-1 font-semibold">
+                      {trace.batch.quantity_current} unidade(s)
+                    </h3>
+                  </div>
 
-                  <p
-                    className={
-                      trace.batch.status === "ACTIVE"
-                        ? "mt-4 rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700"
-                        : "mt-4 rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-700"
-                    }
-                  >
-                    Status: {trace.batch.status}
-                  </p>
+                  <div className="rounded-[24px] bg-[#f5f5f7] p-5">
+                    <p className="text-xs text-neutral-500">Fabricante</p>
+                    <h3 className="mt-1 font-semibold">{trace.batch.manufacturer}</h3>
+                  </div>
 
-                  <p className="mt-4 break-all text-[10px] leading-5 text-neutral-400">
-                    {trace.qr.traceUrl}
+                  <div className="rounded-[24px] bg-[#f5f5f7] p-5">
+                    <p className="text-xs text-neutral-500">Distribuidor</p>
+                    <h3 className="mt-1 font-semibold">{trace.batch.distributor}</h3>
+                  </div>
+                </div>
+
+                <div className="rounded-[24px] bg-[#f5f5f7] p-5">
+                  <div className="flex items-center gap-2">
+                    <MapPin size={18} />
+                    <p className="text-xs text-neutral-500">GPS da retirada</p>
+                  </div>
+
+                  <h3 className="mt-2 font-semibold">
+                    {trace.batch.current_unit_name}
+                  </h3>
+
+                  <p className="mt-1 text-xs text-neutral-500">
+                    {trace.batch.latitude}, {trace.batch.longitude}
                   </p>
                 </div>
-              ) : (
-                <p className="mt-5 text-neutral-500">
-                  QR Code ainda não disponível.
-                </p>
-              )}
-            </Card>
 
-            <Card className="lg:col-span-2">
-              <div className="flex items-center gap-3">
-                <Package />
-                <h2 className="text-3xl font-semibold tracking-tight text-[#1d1d1f]">
-                  Histórico blockchain.
-                </h2>
-              </div>
-
-              <p className="mt-4 max-w-3xl leading-8 text-neutral-600">
-                Cada evento crítico do lote gera um bloco encadeado por hash.
-                A sequência abaixo mostra a história logística e sanitária do
-                medicamento.
-              </p>
-
-              <div className="mt-7 space-y-4">
-                {trace?.blockchain?.events?.map((event) => (
-                  <div
-                    key={event.id}
-                    className="rounded-[28px] bg-[#f5f5f7] p-5"
+                {trace?.qr?.traceUrl && (
+                  <a
+                    href={trace.qr.traceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-2.5 text-[13px] text-white"
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <span className="rounded-full bg-black px-4 py-1.5 text-xs font-medium text-white">
-                        Bloco #{event.block_index}
-                      </span>
-
-                      <span className="text-sm font-semibold text-[#1d1d1f]">
-                        {event.event_type}
-                      </span>
-                    </div>
-
-                    <div className="mt-5 grid gap-3 text-xs leading-6 text-neutral-600">
-                      <p>
-                        <strong>Hash anterior:</strong>{" "}
-                        <span className="break-all font-mono">
-                          {event.previous_hash}
-                        </span>
-                      </p>
-
-                      <p>
-                        <strong>Hash do bloco:</strong>{" "}
-                        <span className="break-all font-mono">
-                          {event.block_hash}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                ))}
-
-                {trace?.blockchain?.valid === true && (
-                  <div className="flex items-center gap-3 rounded-[28px] bg-emerald-50 p-5 text-emerald-700">
-                    <ShieldCheck size={22} />
-                    <p className="font-medium">
-                      Cadeia blockchain validada. Nenhum bloco foi adulterado.
-                    </p>
-                  </div>
-                )}
-
-                {trace?.blockchain?.valid === false && (
-                  <div className="flex items-center gap-3 rounded-[28px] bg-red-50 p-5 text-red-700">
-                    <AlertTriangle size={22} />
-                    <p className="font-medium">
-                      A cadeia apresenta inconsistência.
-                    </p>
-                  </div>
+                    <QrCode size={16} />
+                    Abrir histórico via QR
+                  </a>
                 )}
               </div>
-            </Card>
-          </section>
+            ) : (
+              <p className="mt-7 text-sm text-neutral-500">
+                Nenhum lote carregado. Cadastre um lote primeiro.
+              </p>
+            )}
+          </div>
         </div>
+
+        {dispensation && (
+          <section className="mt-8 rounded-[38px] bg-white p-8 shadow-sm">
+            <div className="flex items-center gap-3">
+              <ShieldCheck size={25} />
+              <h2 className="text-3xl font-semibold tracking-[-0.04em]">
+                Produto vinculado ao paciente.
+              </h2>
+            </div>
+
+            <p className="mt-3 max-w-3xl text-[14px] leading-7 text-neutral-600">
+              A dispensação foi registrada no ledger. O produto agora está
+              vinculado ao paciente por hash, com CPF e Cartão SUS
+              criptografados.
+            </p>
+
+            <div className="mt-7 grid gap-4 md:grid-cols-2">
+              <div className="rounded-[24px] bg-[#f5f5f7] p-5">
+                <div className="flex items-center gap-2">
+                  <LockKeyhole size={18} />
+                  <p className="text-xs text-neutral-500">Hash do paciente</p>
+                </div>
+
+                <p className="mt-2 break-all font-mono text-xs">
+                  {dispensation.patient.patientHash}
+                </p>
+              </div>
+
+              <div className="rounded-[24px] bg-[#f5f5f7] p-5">
+                <div className="flex items-center gap-2">
+                  <LockKeyhole size={18} />
+                  <p className="text-xs text-neutral-500">CPF criptografado</p>
+                </div>
+
+                <p className="mt-2 break-all font-mono text-xs">
+                  {dispensation.patient.encryptedCpf}
+                </p>
+              </div>
+
+              <div className="rounded-[24px] bg-[#f5f5f7] p-5 md:col-span-2">
+                <p className="text-xs text-neutral-500">
+                  Consumo teórico informado
+                </p>
+
+                <pre className="mt-2 overflow-auto rounded-2xl bg-white p-4 text-xs">
+                  {JSON.stringify(
+                    dispensation.patient.theoreticalConsumption,
+                    null,
+                    2
+                  )}
+                </pre>
+              </div>
+
+              <div className="rounded-[24px] bg-black p-5 text-white md:col-span-2">
+                <p className="text-xs text-neutral-400">Hash do bloco</p>
+                <p className="mt-2 break-all font-mono text-xs">
+                  {dispensation.blockchainBlock.block_hash}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
       </section>
     </Shell>
   );

@@ -3,7 +3,7 @@ import Shell from "../components/Shell";
 import {
   Activity,
   ArrowRight,
-  Blocks,
+  Boxes,
   LayoutDashboard,
   PackagePlus,
   QrCode,
@@ -41,7 +41,7 @@ export default function HomePage() {
         </h1>
 
         <p className="mx-auto mt-7 max-w-3xl text-xl leading-9 text-neutral-600">
-          Área operacional para acessar os módulos de blockchain, estoque,
+          Área operacional para acessar blockchain, inventário, estoque,
           cadastro de lotes, QR Code, dispensação, farmacovigilância e auditoria.
         </p>
       </section>
@@ -56,6 +56,13 @@ export default function HomePage() {
           />
 
           <ModuleCard
+            icon={Boxes}
+            title="Inventário"
+            text="Inventário teórico da CAF e das UBS/USF separado por distrito sanitário."
+            to="/inventario"
+          />
+
+          <ModuleCard
             icon={PackagePlus}
             title="Cadastro e QR"
             text="Cadastre medicamento e lote. O QR Code é gerado automaticamente para impressão."
@@ -65,7 +72,7 @@ export default function HomePage() {
           <ModuleCard
             icon={UserRoundCheck}
             title="Dispensação"
-            text="Simule a retirada do medicamento pelo paciente com CPF criptografado e GPS da unidade."
+            text="Vincule medicamento, paciente, CPF, Cartão SUS, consumo teórico, GPS e blockchain."
             to="/demo"
           />
 
@@ -74,13 +81,6 @@ export default function HomePage() {
             title="Farmacovigilância"
             text="Registre eventos adversos, analise riscos e bloqueie lotes para recall sanitário."
             to="/farmacovigilancia"
-          />
-
-          <ModuleCard
-            icon={Blocks}
-            title="Blockchain"
-            text="Consulte eventos registrados em blocos encadeados por hash e valide a integridade da cadeia."
-            to="/executivo"
           />
 
           <ModuleCard
@@ -96,11 +96,11 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl rounded-[48px] bg-black p-10 text-center text-white md:p-16">
           <ShieldCheck className="mx-auto" size={36} />
           <h2 className="mt-8 text-5xl font-semibold tracking-[-0.05em]">
-            Blockchain acessível após login.
+            Produto-paciente registrado por hash.
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-[16px] leading-8 text-neutral-300">
-            Os módulos internos concentram os registros críticos da operação:
-            cadastro, lote, estoque, dispensação, QR Code, recall e auditoria.
+            O FarmaChain conecta lote, medicamento, unidade, GPS, paciente,
+            Cartão SUS, CPF criptografado, consumo teórico e evento blockchain.
           </p>
         </div>
       </section>
